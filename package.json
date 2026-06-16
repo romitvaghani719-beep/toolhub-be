@@ -1,0 +1,25 @@
+{
+  "name": "toolhub-be",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm run build --prefix shared && tsc",
+    "dev": "npm run build --prefix shared && node --env-file=.env --import tsx src/dev-server.ts",
+    "db:migrate": "node --env-file=.env --import tsx scripts/migrate.ts",
+    "db:seed": "npm run build --prefix shared && node --env-file=.env --import tsx scripts/seed.ts",
+    "postinstall": "npm run build --prefix shared"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.50.0",
+    "@toolhub/shared": "file:./shared",
+    "@vercel/node": "^5.2.1",
+    "postgres": "^3.4.7",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
