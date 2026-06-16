@@ -26,10 +26,15 @@ export function getEnv(): Env {
   return cached;
 }
 
+/** Strip whitespace and trailing slash so FE_URL matches browser Origin exactly */
+export function normalizeOrigin(origin: string): string {
+  return origin.trim().replace(/\/$/, "");
+}
+
 /** Comma-separated FE_URL → list of allowed browser origins */
 export function getAllowedOrigins(): string[] {
   return getEnv()
     .FE_URL.split(",")
-    .map((o) => o.trim())
+    .map(normalizeOrigin)
     .filter(Boolean);
 }

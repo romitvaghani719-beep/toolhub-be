@@ -36,7 +36,11 @@ Default admin: `admin@toolvault.io` / `Admin123!`
 npm run dev
 ```
 
-Runs a local API server on port `3001`.
+Runs a local API server on port `3001`. Browser calls go directly to `http://localhost:3001/api`.
+
+Set `FE_URL` to your frontend origin for CORS (must match `VITE_FE_URL` on the frontend). In development, all `localhost` ports are allowed automatically.
+
+See [SETUP.md](./SETUP.md) for full local + production URL configuration.
 
 ## API docs
 

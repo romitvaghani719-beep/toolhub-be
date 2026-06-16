@@ -1,13 +1,30 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getAllowedOrigins } from "../../config/env.js";
+import { getEnv, getAllowedOrigins, normalizeOrigin } from "../../config/env.js";
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function isLocalOrigin(origin: string): boolean {
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  } catch {
+    return false;
+  }
+}
 
 /** Resolve which origin to echo back in Access-Control-Allow-Origin */
 export function resolveCorsOrigin(requestOrigin: string | undefined): string | null {
   const allowed = getAllowedOrigins();
   if (!requestOrigin) return allowed[0] ?? null;
-  if (allowed.includes(requestOrigin)) return requestOrigin;
+
+  const normalized = normalizeOrigin(requestOrigin);
+
+  // Local dev: allow any localhost port (5173, 5174, etc.) without listing each one.
+  if (getEnv().NODE_ENV === "development" && isLocalOrigin(normalized)) {
+    return normalized;
+  }
+
+  if (allowed.includes(normalized)) return normalized;
   return null;
 }
 
@@ -19,9 +36,11 @@ export function applyCorsHeaders(
   if (origin) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Vary", "Origin");
   }
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Max-Age", "86400");
 }
 
 export function cors(req: VercelRequest, res: VercelResponse) {

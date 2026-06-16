@@ -2,43 +2,45 @@
 
 ## URL env vars (local + production)
 
+FE and BE use the same pattern: each app has its own public URL, and they point at each other.
+
 ### Frontend (`toolhub-fe/.env`)
 
 ```env
 VITE_FE_URL=http://localhost:5173
 VITE_BE_URL=http://localhost:3001
-VITE_API_URL=/api
 ```
 
 | Variable | Purpose |
 |----------|---------|
 | `VITE_FE_URL` | Frontend public URL |
-| `VITE_BE_URL` | Backend URL (Vite dev proxy target) |
-| `VITE_API_URL` | Path/URL the browser uses for API calls |
+| `VITE_BE_URL` | Backend URL — browser calls `{VITE_BE_URL}/api` |
 
 ### Backend (`toolhub-be/.env`)
 
 ```env
 BE_URL=http://localhost:3001
-FE_URL=http://localhost:5173,http://localhost:5174
+FE_URL=http://localhost:5173
 ```
 
 | Variable | Purpose |
 |----------|---------|
-| `BE_URL` | Backend public URL (docs / reference) |
-| `FE_URL` | Allowed CORS origins (comma-separated) |
+| `BE_URL` | Backend public URL (must match `VITE_BE_URL` on FE) |
+| `FE_URL` | Allowed CORS origins (must match `VITE_FE_URL` on FE) |
+
+**Rule:** `VITE_BE_URL` (FE) = `BE_URL` (BE), and `VITE_FE_URL` (FE) = value in `FE_URL` (BE).
 
 ---
 
 ## Local development
 
 ```
-Browser → http://localhost:5173/api/tools
-         ↓ (Vite proxy uses VITE_BE_URL)
-Backend → http://localhost:3001/api/tools
+Browser (localhost:5173)
+   → http://localhost:3001/api/tools
+Backend responds with JSON + CORS headers
 ```
 
-CORS: backend only allows origins listed in `FE_URL`.
+CORS: in development, any `http://localhost:*` origin is allowed automatically.
 
 **Terminal 1 — Backend:**
 ```bash
@@ -54,37 +56,23 @@ npm run dev
 
 ---
 
-## Production
+## Production (Vercel)
 
-### Same domain (Vercel rewrites — recommended)
+Same env pattern — only the URLs change.
 
-**FE**
+**FE (Vercel project: toolhub-fe)**
 ```env
-VITE_FE_URL=https://yourapp.vercel.app
-VITE_BE_URL=https://yourapp.vercel.app
-VITE_API_URL=/api
+VITE_FE_URL=https://toolhub-fe.vercel.app
+VITE_BE_URL=https://toolhub-be.vercel.app
 ```
 
-**BE**
+**BE (Vercel project: toolhub-be)**
 ```env
-BE_URL=https://yourapp.vercel.app
-FE_URL=https://yourapp.vercel.app
+BE_URL=https://toolhub-be.vercel.app
+FE_URL=https://toolhub-fe.vercel.app
 ```
 
-### Separate API domain
-
-**FE**
-```env
-VITE_FE_URL=https://app.yourdomain.com
-VITE_BE_URL=https://api.yourdomain.com
-VITE_API_URL=https://api.yourdomain.com
-```
-
-**BE**
-```env
-BE_URL=https://api.yourdomain.com
-FE_URL=https://app.yourdomain.com
-```
+If you get a CORS error in production, check that `FE_URL` on BE **exactly** matches the browser origin (`VITE_FE_URL` on FE). No trailing slash.
 
 ---
 
