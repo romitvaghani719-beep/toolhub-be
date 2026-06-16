@@ -10,6 +10,10 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+
+# Vercel api/ routes are authored as TypeScript; compiled artifacts must not be committed
+api/**/*.js
+api/**/*.d.ts
 *.local
 
 .env
