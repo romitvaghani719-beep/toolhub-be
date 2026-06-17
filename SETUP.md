@@ -93,6 +93,22 @@ npm run db:seed
 
 Login: `admin@toolvault.io` / `Admin123!`
 
+### Browse performance indexes
+
+`GET /api/tools` (browse page) is indexed for these patterns:
+
+| Browse action | Index used |
+|---------------|------------|
+| Newest (default) | `idx_tools_created_at_desc` |
+| Category + newest | `idx_tools_category_created_at` |
+| Most votes | `idx_tools_votes_created_at` |
+| Category + votes | `idx_tools_category_votes` |
+| A → Z sort | `idx_tools_name_asc` |
+| Category + A → Z | `idx_tools_category_name` |
+| Search text | `idx_tools_name_trgm`, `idx_tools_description_trgm` (pg_trgm) |
+
+Migrations `005_read_performance_indexes.sql` and `006_browse_sort_indexes.sql` create these. Re-run `npm run db:migrate` after pulling if browse feels slow.
+
 ---
 
 ## Auth session (7 days)

@@ -27,29 +27,23 @@ export const toolsRepository = {
           ? "votes DESC, created_at DESC"
           : "created_at DESC";
 
-    const [items, countRows] = await Promise.all([
-      sql.unsafe<Tool[]>(
-        `
-        SELECT ${toolsRepository.selectCols}
+    // Single query: page of tools + total count (one table scan vs two)
+    const rows = await sql.unsafe<(Tool & { total_count: string })[]>(
+      `
+        SELECT ${toolsRepository.selectCols}, COUNT(*) OVER()::text AS total_count
         FROM public.tools
         WHERE ($1::text IS NULL OR name ILIKE $1 OR description ILIKE $1)
           AND ($2::text IS NULL OR category = $2)
         ORDER BY ${orderClause}
         LIMIT $3 OFFSET $4
       `,
-        [search, category, params.limit, offset],
-      ),
-      sql.unsafe<{ count: string }[]>(
-        `
-        SELECT COUNT(*)::text AS count FROM public.tools
-        WHERE ($1::text IS NULL OR name ILIKE $1 OR description ILIKE $1)
-          AND ($2::text IS NULL OR category = $2)
-      `,
-        [search, category],
-      ),
-    ]);
+      [search, category, params.limit, offset],
+    );
 
-    return { items, total: Number(countRows[0]?.count ?? 0) };
+    const total = Number(rows[0]?.total_count ?? 0);
+    const items = rows.map(({ total_count: _total, ...tool }) => tool);
+
+    return { items, total };
   },
 
   async findById(id: string) {
