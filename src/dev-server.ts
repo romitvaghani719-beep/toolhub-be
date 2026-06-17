@@ -70,6 +70,10 @@ async function loadRoutes() {
     const body = await readBody(req);
     await authController.login(toVercelReq(req, new URL(req.url!, "http://localhost"), body, p) as never, toVercelRes(res) as never);
   });
+  addRoute("POST", "/api/auth/refresh", async (req, res, p) => {
+    const body = await readBody(req);
+    await authController.refresh(toVercelReq(req, new URL(req.url!, "http://localhost"), body, p) as never, toVercelRes(res) as never);
+  });
   addRoute("POST", "/api/auth/logout", async (req, res, p) => {
     await authController.logout(toVercelReq(req, new URL(req.url!, "http://localhost"), {}, p) as never, toVercelRes(res) as never);
   });

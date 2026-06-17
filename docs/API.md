@@ -16,6 +16,11 @@ All responses follow:
 
 ### POST /api/auth/login
 Body: `{ "email": "string", "password": "string" }`
+Returns: `{ session: { access_token, refresh_token, expires_at }, user }`
+
+### POST /api/auth/refresh
+Body: `{ "refresh_token": "string" }`
+Returns: `{ session: { access_token, refresh_token, expires_at } }`
 
 ### POST /api/auth/logout
 Headers: `Authorization: Bearer <token>`

@@ -92,3 +92,26 @@ npm run db:seed
 ```
 
 Login: `admin@toolvault.io` / `Admin123!`
+
+---
+
+## Auth session (7 days)
+
+Login uses **Supabase Auth**. The app keeps users signed in for **7 days**:
+
+| Token | Lifetime | Purpose |
+|-------|----------|---------|
+| `access_token` | ~1 hour (Supabase JWT) | Sent on every API request |
+| `refresh_token` | **7 days** | Used to get a new access token automatically |
+
+**Configure in Supabase Dashboard → Authentication → Settings:**
+
+1. **JWT expiry** — keep default `3600` (1 hour). The frontend auto-refreshes.
+2. **Refresh token expiry** — set to `604800` seconds (**7 days**).
+
+Flow:
+```
+Login → store access_token + refresh_token + expires_at in browser (localStorage)
+API call → if access token expired → POST /api/auth/refresh → new tokens
+After 7 days → refresh fails → user must log in again
+```

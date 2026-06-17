@@ -9,6 +9,18 @@ export const loginSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
+export const refreshSchema = z.object({
+  refresh_token: z.string().min(1, "Refresh token is required"),
+});
+export type RefreshInput = z.infer<typeof refreshSchema>;
+
+export const sessionSchema = z.object({
+  access_token: z.string(),
+  refresh_token: z.string(),
+  expires_at: z.number(),
+});
+export type SessionTokens = z.infer<typeof sessionSchema>;
+
 export const createUserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
