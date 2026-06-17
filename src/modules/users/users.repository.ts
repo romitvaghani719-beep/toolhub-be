@@ -58,6 +58,11 @@ export const usersRepository = {
     const rows = await sql<UserRow[]>`
       INSERT INTO public.users (id, email, name, role)
       VALUES (${input.id}, ${input.email}, ${input.name}, ${input.role})
+      ON CONFLICT (id) DO UPDATE SET
+        email = EXCLUDED.email,
+        name = EXCLUDED.name,
+        role = EXCLUDED.role,
+        updated_at = NOW()
       RETURNING id, email, name, role, created_at, updated_at
     `;
     return rows[0];

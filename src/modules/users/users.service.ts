@@ -15,11 +15,12 @@ export const usersService = {
   },
 
   async create(input: CreateUserInput) {
+    const role = input.role ?? "user";
     const { data, error } = await getSupabaseAdmin().auth.admin.createUser({
       email: input.email,
       password: input.password,
       email_confirm: true,
-      user_metadata: { name: input.name },
+      user_metadata: { name: input.name, role },
     });
 
     if (error || !data.user) {
@@ -30,7 +31,7 @@ export const usersService = {
       id: data.user.id,
       email: input.email,
       name: input.name,
-      role: input.role ?? "user",
+      role,
     });
   },
 
